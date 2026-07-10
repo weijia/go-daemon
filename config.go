@@ -13,7 +13,7 @@ const configFileName = "config.json"
 
 // RemoteStorageConfig 描述如何连接 RemoteStorage 服务器（标准 RemoteStorage 协议，Bearer Token 鉴权）。
 type RemoteStorageConfig struct {
-	Server       string `json:"server"`        // 服务器根地址，如 https://rs.example.com
+	Server       string `json:"server"`        // 存储根地址（含用户名路径），如 https://storage.5apps.com/weijia
 	User         string `json:"user"`          // 存储用户段，用于路径模板中的 {user}
 	Token        string `json:"token"`         // Bearer Token
 	Scope        string `json:"scope"`         // 作用域，如 /ufs-nodes/（仅记录，便于阅读）
@@ -66,7 +66,7 @@ func defaultConfig() Config {
 			User:         "me",
 			Token:        "",
 			Scope:        "/ufs-nodes/",
-			PathTemplate: "/storage/{user}/ufs-nodes/{uuid}.json",
+			PathTemplate: "/ufs-nodes/{uuid}.json",
 		},
 		Report: ReportConfig{IntervalMinutes: 15, ExtraInfo: true},
 		HTTP:   HTTPConfig{Listen: "127.0.0.1:9801"},

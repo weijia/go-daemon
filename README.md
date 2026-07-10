@@ -7,7 +7,7 @@
 - 仅一个系统托盘图标：右键菜单可「打开配置」「立即上报」「退出」。
 - 周期性上报：默认每 15 分钟（可配置）向 RemoteStorage 服务器 `PUT` 节点 JSON；启动即上报一次。
 - 符合规范的数据格式：`{ uuid, name, status, last_access }`，并默认附带本机基础信息（hostname / 操作系统 / 版本）。
-- 标准 RemoteStorage 协议：`Authorization: Bearer <token>` 鉴权，目标 URL 形如 `{server}/storage/{user}/ufs-nodes/{uuid}.json`（路径模板可配置）。
+- 标准 RemoteStorage 协议：`Authorization: Bearer <token>` 鉴权，目标 URL = `server`（**存储根地址，含用户名路径**）拼接 `path_template`；默认 `{server}/ufs-nodes/{uuid}.json`（路径模板可配置）。
 - 本地配置持久化：首次运行自动生成 `config.json`（含自动生成的 UUID v4、默认取主机名）。
 - 本地 HTTP 配置：浏览器打开即看内置配置页；同时提供 REST API，便于脚本集成。
 - 极低资源：仅 3 个常驻 goroutine（托盘、HTTP 服务、定时上报），仅在定时或手动触发时才发起网络请求。
@@ -18,16 +18,18 @@
 |------|------|
 | `uuid` | 节点唯一标识（UUID v4），自动生成，请勿随意修改 |
 | `name` | 节点显示名称 |
-| `remotestorage.server` | RemoteStorage 服务器根地址，如 `https://rs.example.com` |
+| `remotestorage.server` | 存储根地址（**含用户名路径**），如 `https://storage.5apps.com/weijia` |
 | `remotestorage.user` | 存储用户段，用于路径模板中的 `{user}` |
 | `remotestorage.token` | Bearer Token |
 | `remotestorage.scope` | 作用域（仅记录，便于阅读），如 `/ufs-nodes/` |
-| `remotestorage.path_template` | 路径模板，支持 `{user}` `{uuid}`，默认 `/storage/{user}/ufs-nodes/{uuid}.json` |
+| `remotestorage.path_template` | 路径模板（相对存储根），支持 `{user}` `{uuid}`，默认 `/ufs-nodes/{uuid}.json` |
 | `report.interval_minutes` | 上报间隔（分钟），默认 15 |
 | `report.extra_info` | 是否附带本机基础信息（hostname / os / version） |
 | `http.listen` | 本地 HTTP 监听地址（仅本机），默认 `127.0.0.1:9801` |
 
-目标 URL 计算：`{server}` + `path_template`（替换 `{user}`/`{uuid}`）。
+目标 URL 计算：去掉 `server` 结尾的 `/` 后拼接 `path_template`（替换 `{user}`/`{uuid}`）。`server` 即存储根，例如 5apps 为 `https://storage.5apps.com/weijia`，最终 PUT 到 `https://storage.5apps.com/weijia/ufs-nodes/<uuid>.json`。
+
+> 注意：`server` 应填**存储根**（已包含用户名路径），不要把用户段同时写进 `server` 和 `path_template` 的 `{user}`，否则路径会被重复拼接。
 
 ## 本地 HTTP 接口
 
@@ -48,7 +50,7 @@ curl http://127.0.0.1:9801/api/status
 # 修改上报间隔为 5 分钟
 curl -X POST http://127.0.0.1:9801/api/config \
   -H 'Content-Type: application/json' \
-  -d '{"uuid":"<现有uuid>","name":"我的节点","remotestorage":{"server":"https://rs.example.com","user":"me","token":"TOKEN","scope":"/ufs-nodes/","path_template":"/storage/{user}/ufs-nodes/{uuid}.json"},"report":{"interval_minutes":5,"extra_info":true},"http":{"listen":"127.0.0.1:9801"}}'
+  -d '{"uuid":"<现有uuid>","name":"我的节点","remotestorage":{"server":"https://storage.5apps.com/weijia","user":"weijia","token":"TOKEN","scope":"/ufs-nodes/","path_template":"/ufs-nodes/{uuid}.json"},"report":{"interval_minutes":5,"extra_info":true},"http":{"listen":"127.0.0.1:9801"}}'
 ```
 
 > 提示：先用 `GET /api/config` 取回当前完整配置，再按需修改后 `POST` 回去，可避免遗漏字段。

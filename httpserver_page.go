@@ -68,8 +68,9 @@ const configPageHTML = `<!DOCTYPE html>
 
     <div class="card">
       <h2>RemoteStorage 服务器</h2>
-      <label>服务器地址 Server</label>
-      <input type="text" id="rs_server" placeholder="https://remotestorage.example.com">
+      <label>服务器地址 Server（存储根，含用户名路径）</label>
+      <input type="text" id="rs_server" placeholder="https://storage.5apps.com/weijia">
+      <div class="hint">例如 5apps 为 https://storage.5apps.com/&lt;用户名&gt;；最终 PUT 地址 = 该地址 + 路径模板。</div>
       <div class="row">
         <div>
           <label>用户 User</label>
@@ -83,7 +84,7 @@ const configPageHTML = `<!DOCTYPE html>
       <label>Bearer Token</label>
       <input type="password" id="rs_token" placeholder="鉴权令牌">
       <label>路径模板 PathTemplate（支持 {user} {uuid}）</label>
-      <input type="text" id="rs_path" placeholder="/storage/{user}/ufs-nodes/{uuid}.json">
+      <input type="text" id="rs_path" placeholder="/ufs-nodes/{uuid}.json">
       <div class="hint">实际 PUT 地址为：<span id="resolved"></span></div>
     </div>
 
