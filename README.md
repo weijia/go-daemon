@@ -18,6 +18,7 @@
 |------|------|
 | `uuid` | 节点唯一标识（UUID v4），自动生成，请勿随意修改 |
 | `name` | 节点显示名称 |
+| `autostart` | 是否开机自启（默认 `true`）；勾选后写入 Windows 注册表 Run 项，登录后自动运行（仅 Windows 生效） |
 | `remotestorage.server` | 存储根地址（**含用户名路径**），如 `https://storage.5apps.com/weijia` |
 | `remotestorage.user` | 存储用户段，用于路径模板中的 `{user}` |
 | `remotestorage.token` | Bearer Token |

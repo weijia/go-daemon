@@ -64,6 +64,8 @@ const configPageHTML = `<!DOCTYPE html>
       <input type="text" id="uuid" disabled>
       <label>显示名称</label>
       <input type="text" id="name" placeholder="节点名称">
+      <label class="checkbox"><input type="checkbox" id="autostart"> 开机自动启动（Windows 登录后自动运行）</label>
+      <div class="hint">勾选后写入系统自启项（Windows 注册表 Run）；取消则从自启项移除。仅 Windows 生效。</div>
     </div>
 
     <div class="card">
@@ -122,6 +124,7 @@ function toast(msg){
 function fill(c){
   $('uuid').value=c.uuid||'';
   $('name').value=c.name||'';
+  $('autostart').checked=!!c.autostart;
   $('rs_server').value=c.remotestorage?.server||'';
   $('rs_user').value=c.remotestorage?.user||'';
   $('rs_scope').value=c.remotestorage?.scope||'';
@@ -134,7 +137,7 @@ function fill(c){
 }
 function collect(){
   return {
-    uuid:$('uuid').value, name:$('name').value,
+    uuid:$('uuid').value, name:$('name').value, autostart:$('autostart').checked,
     remotestorage:{
       server:$('rs_server').value, user:$('rs_user').value,
       scope:$('rs_scope').value, token:$('rs_token').value,

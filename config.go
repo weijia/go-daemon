@@ -35,6 +35,7 @@ type HTTPConfig struct {
 type Config struct {
 	UUID          string              `json:"uuid"`
 	Name          string              `json:"name"`
+	Autostart     bool                `json:"autostart"`     // 是否开机自启（写入系统，如 Windows Run 项）
 	RemoteStorage RemoteStorageConfig `json:"remotestorage"`
 	Report        ReportConfig        `json:"report"`
 	HTTP          HTTPConfig          `json:"http"`
@@ -59,8 +60,9 @@ func defaultConfig() Config {
 		host = "node"
 	}
 	return Config{
-		UUID: generateUUID(),
-		Name: host,
+		UUID:      generateUUID(),
+		Name:      host,
+		Autostart: true, // 首次运行默认开启开机自启
 		RemoteStorage: RemoteStorageConfig{
 			Server:       "https://remotestorage.example.com",
 			User:         "me",

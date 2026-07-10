@@ -70,13 +70,25 @@ func NewApp(cfgPath string) (*App, error) {
 			return nil, err
 		}
 	}
-	return &App{
+	app := &App{
 		cfgPath:   cfgPath,
 		cfg:       cfg,
 		client:    &http.Client{Timeout: 10 * time.Second},
 		retrigger: make(chan struct{}, 1),
 		quit:      make(chan struct{}),
-	}, nil
+	}
+	app.applyAutostart()
+	return app, nil
+}
+
+// applyAutostart 将当前配置中的 autostart 状态同步到系统（如 Windows 注册表 Run 项）。
+func (a *App) applyAutostart() {
+	a.mu.RLock()
+	enabled := a.cfg.Autostart
+	a.mu.RUnlock()
+	if err := SetAutostart(enabled); err != nil {
+		log.Printf("设置开机自启失败: %v", err)
+	}
 }
 
 // Config 返回当前配置的副本。
@@ -119,6 +131,9 @@ func (a *App) ApplyConfig(newCfg Config) error {
 	if err := SaveConfig(a.cfgPath, newCfg); err != nil {
 		return err
 	}
+
+	// 同步开机自启状态（如 Windows 注册表）
+	a.applyAutostart()
 
 	// 触发定时循环以应用新的间隔
 	select {
