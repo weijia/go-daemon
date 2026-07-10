@@ -1,0 +1,17 @@
+# 密钥：切勿提交
+.env
+
+# 运行时生成的用户配置（含 RemoteStorage token）
+config.json
+
+# 编译产物（含编辑器备份 ~ 文件）
+*.exe
+*.exe~
+
+# Agent / IDE 内部数据
+.codebuddy/
+
+# 操作系统 / 编辑器
+.DS_Store
+Thumbs.db
+*.out

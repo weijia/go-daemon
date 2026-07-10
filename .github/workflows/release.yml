@@ -1,0 +1,63 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  # 每次 push（含 main）都编译一次，确保可构建
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Build windows exe (no console)
+        shell: pwsh
+        run: |
+          $version = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME } else { 'dev' }
+          go build -ldflags "-H=windowsgui -X main.version=$version" -o go-daemon.exe .
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: go-daemon-${{ github.sha }}
+          path: go-daemon.exe
+          if-no-files-found: error
+
+  # 仅打 tag（如 v0.1.0）时发布 Release 并附上 exe
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Build windows exe (no console)
+        shell: pwsh
+        run: |
+          $version = $env:GITHUB_REF_NAME
+          go build -ldflags "-H=windowsgui -X main.version=$version" -o go-daemon.exe .
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          files: go-daemon.exe
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
