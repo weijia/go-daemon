@@ -25,7 +25,7 @@ jobs:
         shell: pwsh
         run: |
           $version = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME } else { 'dev' }
-          go build -ldflags "-H=windowsgui -X main.version=$version" -o go-daemon.exe .
+          go build -trimpath -ldflags "-H=windowsgui -s -w -X main.version=$version" -o go-daemon.exe .
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -51,7 +51,7 @@ jobs:
         shell: pwsh
         run: |
           $version = $env:GITHUB_REF_NAME
-          go build -ldflags "-H=windowsgui -X main.version=$version" -o go-daemon.exe .
+          go build -trimpath -ldflags "-H=windowsgui -s -w -X main.version=$version" -o go-daemon.exe .
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
